@@ -203,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
                     playButton.setText("Stop");
                     playButton.setTextColor(Color.parseColor("#FF0000"));
 
-                    recordButton.setEnabled(true);
+                    recordButton.setEnabled(false);
                     recordButton.setTextColor(Color.parseColor("#ffffff"));
                     runTimer();
                 }
@@ -218,6 +218,9 @@ public class MainActivity extends AppCompatActivity {
 
                     playButton.setEnabled(true);
                     playButton.setText("Play");
+
+                    recordButton.setEnabled(true);
+
                     playButton.setTextColor(Color.parseColor("#ffffff"));
 
                     handler.removeCallbacksAndMessages(null);
