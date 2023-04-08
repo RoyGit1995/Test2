@@ -6,16 +6,18 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
-import android.content.ContextWrapper;
+
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -23,9 +25,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -41,7 +45,10 @@ public class MainActivity extends AppCompatActivity {
     private MediaRecorder mediaRecorder;
     private MediaPlayer mediaPlayer;
 
-    private String filePath;
+    private String fileName;
+
+    private File file;
+    private File fileRecord;
 
     private boolean isRecording = false;
 
@@ -79,15 +86,25 @@ public class MainActivity extends AppCompatActivity {
                     if(!isRecording)
                     {
                         isRecording = true;
+                        fileRecord = getRecordingFilePath();
+
+                        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+                        fileName = "AUDIO_" + timeStamp + ".mp3";
+                        file = new File(fileRecord, fileName);
+
+                        //check if its the first time and then dont make directory
                         executorService.execute(new Runnable() {
                             @Override
                             public void run() {
                                 mediaRecorder = new MediaRecorder();
                                 mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-                                mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-                                mediaRecorder.setOutputFile(getRecordingFilePath());
-                                filePath = getRecordingFilePath();
-                                mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+                                mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+
+                                mediaRecorder.setOutputFile(file.getAbsolutePath());
+
+                                mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+                                mediaRecorder.setAudioEncodingBitRate(128000);
+                                mediaRecorder.setAudioSamplingRate(44100);
 
                                 try {
                                     mediaRecorder.prepare();
@@ -101,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
                                     @Override
                                     public void run() {
                                         recordButton.setTextColor(Color.parseColor("#FF0000"));
-
+                                        playButton.setEnabled(false);
                                         playableSeconds = 0;
                                         seconds = 0;
                                         dummySeconds = 0;
@@ -120,11 +137,14 @@ public class MainActivity extends AppCompatActivity {
                             public void run() {
                                 mediaRecorder.stop();
                                 mediaRecorder.release();
+                                saveAudioFile();
                                 mediaRecorder = null;
                                 playableSeconds = seconds;
                                 dummySeconds = seconds;
                                 seconds = 0;
                                 isRecording = false;
+
+
 
                                 runOnUiThread(new Runnable() {
                                     @Override
@@ -157,10 +177,10 @@ public class MainActivity extends AppCompatActivity {
 
                 if(!isPlaying)
                 {
-                    if(filePath!=null)
+                    if(fileName!=null)
                     {
                         try {
-                            mediaPlayer.setDataSource(getRecordingFilePath());
+                            mediaPlayer.setDataSource(file.getAbsolutePath());
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
@@ -179,9 +199,12 @@ public class MainActivity extends AppCompatActivity {
 
                     mediaPlayer.start();
                     isPlaying = true;
-                    recordButton.setTextColor(Color.parseColor("#FF0000"));
 
-                    playButton.setEnabled(false);
+                    playButton.setText("Stop");
+                    playButton.setTextColor(Color.parseColor("#FF0000"));
+
+                    recordButton.setEnabled(true);
+                    recordButton.setTextColor(Color.parseColor("#ffffff"));
                     runTimer();
                 }
                 else
@@ -193,6 +216,10 @@ public class MainActivity extends AppCompatActivity {
                     isPlaying = false;
                     seconds = 0;
 
+                    playButton.setEnabled(true);
+                    playButton.setText("Play");
+                    playButton.setTextColor(Color.parseColor("#ffffff"));
+
                     handler.removeCallbacksAndMessages(null);
                 }
 
@@ -200,6 +227,34 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
+    }
+
+    private void saveAudioFile() {
+
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Audio.Media.DISPLAY_NAME, fileName);
+        values.put(MediaStore.Audio.Media.MIME_TYPE, "audio/mpeg");
+        values.put(MediaStore.Audio.Media.RELATIVE_PATH, Environment.DIRECTORY_MUSIC);
+
+        ContentResolver contentResolver = getContentResolver();
+        Uri uri = contentResolver.insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, values);
+
+        try {
+            OutputStream outputStream = contentResolver.openOutputStream(uri);
+            FileInputStream fileInputStream = new FileInputStream(file);
+
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+
+            while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+
+            fileInputStream.close();
+            outputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void runTimer()
@@ -271,56 +326,27 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-    private String getRecordingFilePath()
-    {
-        ContextWrapper contextWrapper = new ContextWrapper(getApplicationContext());
-        File music = contextWrapper.getExternalFilesDir(Environment.DIRECTORY_MUSIC);
-        File file = new File(music, "AudioFile.3gp");
-        Log.d(filePath,"The file path isssssssss" + file.getPath().toString());
+    private File getRecordingFilePath() {
 
-        //File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).getAbsolutePath() + "/MyApp/Audio");
-        //File fileEx = new File(directory, "AudioFileEx"+".mp3");
-        //Log.d(filePath,fileEx.getPath().toString());
+        File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC), "Audio Recordings");
 
+        Log.d("Directory", directory.getAbsolutePath().toString());
 
-
-
-            try {
-                // Open a file output stream
-
-                FileOutputStream outputStream = new FileOutputStream(file);
-                Log.d(filePath,"FileOutputStream outputStream");
-
-                // Copy the MP3 file from your app's assets folder to the file output stream
-
-                InputStream inputStream = getAssets().open("AudioFile.3gp");
-                byte[] buffer = new byte[1024];
-                int length;
-                while ((length = inputStream.read(buffer)) > 0) {
-                    outputStream.write(buffer, 0, length);
-                }
-
-                Log.d(filePath,"InputStream inputStream");
-
-                // Close the streams
-                inputStream.close();
-                outputStream.flush();
-                outputStream.close();
-
-                // Print a success message
-                System.out.println("File saved successfully!");
-            } catch (IOException e) {
-                // Print an error message
-                System.err.println("Error saving file: " + e.getMessage());
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+        else {
+            File[] files = directory.listFiles();
+            if(files != null) {
+                for(File file : files) {
+                    Log.d("Files", file.getName().toString() + "         "  +  file.getAbsolutePath());
+                    file.delete();
+                    }
             }
-            return file.getPath();
-
-
-
-
-
-
+        }
+        return directory;
     }
+
 }
 
 
