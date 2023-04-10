@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -57,6 +58,9 @@ public class MainActivity extends AppCompatActivity {
     ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     private int playableSeconds, seconds, dummySeconds = 0;
+
+    private int currentTrackIndex = 0;
+    private File[] tracks;
 
     @SuppressWarnings("deprecation")
     Handler handler = new Handler();
@@ -92,8 +96,10 @@ public class MainActivity extends AppCompatActivity {
                         fileName = "AUDIO_" + timeStamp + ".mp3";
                         file = new File(fileRecord, fileName);
 
-                        //check if its the first time and then dont make directory
+                        //check if its
+                        // the first time and then dont make directory
                         executorService.execute(new Runnable() {
+
                             @Override
                             public void run() {
                                 mediaRecorder = new MediaRecorder();
@@ -171,6 +177,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //play
+        /*
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -179,11 +186,8 @@ public class MainActivity extends AppCompatActivity {
                 {
                     if(fileName!=null)
                     {
-                        try {
-                            mediaPlayer.setDataSource(file.getAbsolutePath());
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
+                        tracks = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).listFiles((dir, name) -> name.endsWith(".mp3"));
+
                     }
                     else
                     {
@@ -191,21 +195,49 @@ public class MainActivity extends AppCompatActivity {
                         return;
                     }
 
-                    try {
-                        mediaPlayer.prepare();
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-
-                    mediaPlayer.start();
                     isPlaying = true;
 
                     playButton.setText("Stop");
                     playButton.setTextColor(Color.parseColor("#FF0000"));
 
-                    recordButton.setEnabled(false);
                     recordButton.setTextColor(Color.parseColor("#ffffff"));
+                    recordButton.setEnabled(false);
+
                     runTimer();
+
+                    ////////////////////////////
+                    mediaPlayer.setOnCompletionListener(mp -> {
+                        // Move to the next track
+                        currentTrackIndex++;
+                        if (currentTrackIndex >= tracks.length) {
+                            // Start again from the beginning
+                            currentTrackIndex = 0;
+                        }
+
+                        // Load and play the next track
+                        try {
+                            mediaPlayer = new MediaPlayer();
+                            mediaPlayer.setDataSource(tracks[currentTrackIndex].getPath());
+                            mediaPlayer.prepare();
+                            mediaPlayer.start();
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+
+                    ///////////////
+
+
+                    ///////////
+                    try {
+                        mediaPlayer.setDataSource(tracks[currentTrackIndex].getPath());
+                        mediaPlayer.prepare();
+                        mediaPlayer.start();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
                 }
                 else
                 {
@@ -229,6 +261,70 @@ public class MainActivity extends AppCompatActivity {
             }
 
         });
+
+         */
+
+        playButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if(fileName!=null)
+                {
+                    tracks = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).listFiles((dir, name) -> name.endsWith(".mp3"));
+
+                }
+                else
+                {
+                    Toast.makeText(getApplicationContext(),"No residing Present",Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                playButton.setText("Stop");
+                playButton.setTextColor(Color.parseColor("#FF0000"));
+
+                recordButton.setTextColor(Color.parseColor("#ffffff"));
+                recordButton.setEnabled(false);
+
+                runTimer();
+
+                playNext();
+
+
+            }
+        });
+
+    }
+
+
+    private void playNext() {
+
+        if (currentTrackIndex < tracks.length)
+        {
+            for (File f : tracks) {
+                mediaPlayer = new MediaPlayer();
+                try {
+                    mediaPlayer.setDataSource(f.getPath());
+                    mediaPlayer.prepare();
+                    mediaPlayer.start();
+                    currentTrackIndex++;
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        else
+        {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+            mediaPlayer = null;
+            mediaPlayer = new MediaPlayer();
+
+            playButton.setEnabled(true);
+            playButton.setText("Play");
+            recordButton.setEnabled(true);
+            playButton.setTextColor(Color.parseColor("#ffffff"));
+
+        }
 
     }
 
@@ -303,11 +399,11 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean checkRecordingPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_DENIED)
-            {
-                requestRecordingPermission();
-                return false;
-            }
-            return true;
+        {
+            requestRecordingPermission();
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -344,7 +440,7 @@ public class MainActivity extends AppCompatActivity {
                 for(File file : files) {
                     Log.d("Files", file.getName().toString() + "         "  +  file.getAbsolutePath());
                     file.delete();
-                    }
+                }
             }
         }
         return directory;
