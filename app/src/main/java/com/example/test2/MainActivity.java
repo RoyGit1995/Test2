@@ -35,7 +35,7 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCompletionListener {
 
     private static final int RECORD_REQUEST_CODE = 101;
 
@@ -53,7 +53,13 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean isRecording = false;
 
-    private boolean isPlaying = false;
+    private boolean isPlayingMedia = false;
+
+    private boolean playButtonPressed = true;
+
+    private int musicPosition = 0;
+
+    private boolean pauseButtonPlay = false;
 
     ExecutorService executorService = Executors.newSingleThreadExecutor();
 
@@ -78,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
         playButton = (Button) findViewById(R.id.playButton);
         viewById = (TextView) findViewById(R.id.runTime);
         mediaPlayer = new MediaPlayer();
+
 
 
         //recording
@@ -176,156 +183,87 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //play
-        /*
+
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //Log.d("playButton", "playButton is pressed");
 
-                if(!isPlaying)
+                if (playButtonPressed)
                 {
-                    if(fileName!=null)
-                    {
+                    //Log.d("playButtonPressed", "inside play button if");
+                    playButtonPressed = false;
+                    if (fileName != null) {
                         tracks = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).listFiles((dir, name) -> name.endsWith(".mp3"));
 
-                    }
-                    else
-                    {
-                        Toast.makeText(getApplicationContext(),"No residing Present",Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getApplicationContext(), "No residing Present", Toast.LENGTH_SHORT).show();
                         return;
                     }
-
-                    isPlaying = true;
-
-                    playButton.setText("Stop");
-                    playButton.setTextColor(Color.parseColor("#FF0000"));
-
-                    recordButton.setTextColor(Color.parseColor("#ffffff"));
-                    recordButton.setEnabled(false);
-
-                    runTimer();
-
-                    ////////////////////////////
-                    mediaPlayer.setOnCompletionListener(mp -> {
-                        // Move to the next track
-                        currentTrackIndex++;
-                        if (currentTrackIndex >= tracks.length) {
-                            // Start again from the beginning
-                            currentTrackIndex = 0;
-                        }
-
-                        // Load and play the next track
-                        try {
-                            mediaPlayer = new MediaPlayer();
-                            mediaPlayer.setDataSource(tracks[currentTrackIndex].getPath());
-                            mediaPlayer.prepare();
-                            mediaPlayer.start();
-
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    });
-
-                    ///////////////
-
-
-                    ///////////
-                    try {
-                        mediaPlayer.setDataSource(tracks[currentTrackIndex].getPath());
-                        mediaPlayer.prepare();
-                        mediaPlayer.start();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-                else
-                {
-                    mediaPlayer.stop();
-                    mediaPlayer.release();
-                    mediaPlayer = null;
                     mediaPlayer = new MediaPlayer();
-                    isPlaying = false;
-                    seconds = 0;
-
-                    playButton.setEnabled(true);
-                    playButton.setText("Play");
-
-                    recordButton.setEnabled(true);
-
-                    playButton.setTextColor(Color.parseColor("#ffffff"));
-
-                    handler.removeCallbacksAndMessages(null);
-                }
-
-            }
-
-        });
-
-         */
-
-        playButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                if(fileName!=null)
-                {
-                    tracks = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).listFiles((dir, name) -> name.endsWith(".mp3"));
+                    play();
 
                 }
                 else
                 {
-                    Toast.makeText(getApplicationContext(),"No residing Present",Toast.LENGTH_SHORT).show();
-                    return;
+                    //Log.d("pauseButtonPressed", "inside pause button");
+                    playButtonPressed = true;
+                    playButton.setText("Play");
+                    pause();
                 }
-
-                playButton.setText("Stop");
-                playButton.setTextColor(Color.parseColor("#FF0000"));
-
-                recordButton.setTextColor(Color.parseColor("#ffffff"));
-                recordButton.setEnabled(false);
-
-                runTimer();
-
-                playNext();
-
-
+                mediaPlayer.setOnCompletionListener(MainActivity.this);
             }
+
         });
 
     }
 
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+        // When the current music file finishes playing, play the next one
+        Log.d("onCompletion", "onCompletion inside");
+        play();
+    }
 
-    private void playNext() {
+    private void play() {
 
-        if (currentTrackIndex < tracks.length)
+        if(pauseButtonPlay)
         {
-            for (File f : tracks) {
-                mediaPlayer = new MediaPlayer();
-                try {
-                    mediaPlayer.setDataSource(f.getPath());
-                    mediaPlayer.prepare();
-                    mediaPlayer.start();
-                    currentTrackIndex++;
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+            Log.d("pauseButtonPlay", "pauseButtonPlay to start from the pause ");
+            mediaPlayer.reset();
+            try {
+                mediaPlayer.setDataSource(tracks[currentTrackIndex].getPath());
+                mediaPlayer.prepare();
+                mediaPlayer.seekTo(musicPosition);
+                mediaPlayer.start();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            pauseButtonPlay = false;
+
+        }
+        else {
+
+            try {
+                currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+                Log.d("play", "inside play function");
+                mediaPlayer.reset();
+                mediaPlayer.setDataSource(tracks[currentTrackIndex].getPath());
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+                playButton.setText("Pause");
+
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
-        else
-        {
-            mediaPlayer.stop();
-            mediaPlayer.release();
-            mediaPlayer = null;
-            mediaPlayer = new MediaPlayer();
+    }
 
-            playButton.setEnabled(true);
-            playButton.setText("Play");
-            recordButton.setEnabled(true);
-            playButton.setTextColor(Color.parseColor("#ffffff"));
-
-        }
-
+    private void pause() {
+        pauseButtonPlay = true;
+        mediaPlayer.pause();
+        musicPosition = mediaPlayer.getCurrentPosition();
+        Log.d("musicPosition value issssss.....", String.valueOf(musicPosition));
     }
 
     private void saveAudioFile() {
@@ -366,12 +304,12 @@ public class MainActivity extends AppCompatActivity {
                 String time = String.format(Locale.getDefault(),"%02d:%02d",minutes,secs);
                 viewById.setText(time);
 
-                if(isRecording || (isPlaying && playableSeconds!= -1))
+                if(isRecording || (isPlayingMedia && playableSeconds!= -1))
                 {
                     seconds++;
                     playableSeconds--;
 
-                    if(playableSeconds == -1 && isPlaying)
+                    if(playableSeconds == -1 && isPlayingMedia)
                     {
                         mediaPlayer.stop();
                         mediaPlayer.release();
