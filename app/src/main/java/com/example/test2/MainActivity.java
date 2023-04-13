@@ -42,6 +42,9 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
     private Button playButton;
     private Button recordButton;
     private TextView viewById;
+    private Button stopButton;
+    private Button backwardButton;
+    private Button forwardButton;
 
     private MediaRecorder mediaRecorder;
     private MediaPlayer mediaPlayer;
@@ -65,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
 
     private int playableSeconds, seconds, dummySeconds = 0;
 
-    private int currentTrackIndex = 0;
+    private int currentTrackIndex = -1;
     private File[] tracks;
 
     @SuppressWarnings("deprecation")
@@ -83,6 +86,9 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
         recordButton = (Button) findViewById(R.id.recordButton);
         playButton = (Button) findViewById(R.id.playButton);
         viewById = (TextView) findViewById(R.id.runTime);
+        stopButton = (Button) findViewById(R.id.stopButton);
+        backwardButton = (Button) findViewById(R.id.backwardButton);
+        forwardButton = (Button) findViewById(R.id.forwardButton);
         mediaPlayer = new MediaPlayer();
 
 
@@ -132,9 +138,11 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
                                     public void run() {
                                         recordButton.setTextColor(Color.parseColor("#FF0000"));
                                         playButton.setEnabled(false);
-                                        playableSeconds = 0;
-                                        seconds = 0;
-                                        dummySeconds = 0;
+                                        stopButton.setEnabled(false);
+                                        backwardButton.setEnabled(false);
+                                        //playableSeconds = 0;
+                                        //seconds = 0;
+                                        //dummySeconds = 0;
 
                                         runTimer();
 
@@ -154,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
                                 mediaRecorder = null;
                                 playableSeconds = seconds;
                                 dummySeconds = seconds;
-                                seconds = 0;
+                                //seconds = 0;
                                 isRecording = false;
 
 
@@ -164,6 +172,9 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
                                     public void run() {
                                         recordButton.setTextColor(Color.parseColor("#ffffff"));
                                         playButton.setEnabled(true);
+                                        stopButton.setEnabled(true);
+                                        backwardButton.setEnabled(true);
+
                                         handler.removeCallbacksAndMessages(null);
 
 
@@ -216,6 +227,33 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
 
         });
 
+        stopButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mediaPlayer.stop();
+                currentTrackIndex = -1;
+                playButton.setText("Play");
+            }
+        });
+
+        backwardButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(mediaPlayer != null){
+                    mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() - 10000);
+                }
+            }
+        });
+
+        forwardButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(mediaPlayer != null){
+                    mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + 10000);
+                }
+            }
+        });
+
     }
 
     @Override
@@ -226,36 +264,38 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
     }
 
     private void play() {
+        if (currentTrackIndex <= tracks.length) {
+            if (pauseButtonPlay) {
+                Log.d("pauseButtonPlay", "pauseButtonPlay to start from the pause ");
+                mediaPlayer.reset();
+                try {
+                    mediaPlayer.setDataSource(tracks[currentTrackIndex].getPath());
+                    mediaPlayer.prepare();
+                    mediaPlayer.seekTo(musicPosition);
+                    mediaPlayer.start();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                pauseButtonPlay = false;
 
-        if(pauseButtonPlay)
-        {
-            Log.d("pauseButtonPlay", "pauseButtonPlay to start from the pause ");
-            mediaPlayer.reset();
-            try {
-                mediaPlayer.setDataSource(tracks[currentTrackIndex].getPath());
-                mediaPlayer.prepare();
-                mediaPlayer.seekTo(musicPosition);
-                mediaPlayer.start();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            } else {
+
+                try {
+                    currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+                    Log.d("play", "inside play function");
+                    mediaPlayer.reset();
+                    mediaPlayer.setDataSource(tracks[currentTrackIndex].getPath());
+                    mediaPlayer.prepare();
+                    mediaPlayer.start();
+                    playButton.setText("Pause");
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-            pauseButtonPlay = false;
-
         }
         else {
-
-            try {
-                currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
-                Log.d("play", "inside play function");
-                mediaPlayer.reset();
-                mediaPlayer.setDataSource(tracks[currentTrackIndex].getPath());
-                mediaPlayer.prepare();
-                mediaPlayer.start();
-                playButton.setText("Pause");
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            currentTrackIndex = 0;
         }
     }
 
