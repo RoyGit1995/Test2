@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -35,6 +36,22 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+//////////////
+import android.content.Context;
+import android.graphics.*;
+import android.os.Environment;
+import android.util.AttributeSet;
+import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.Button;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+////////////
+
 public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCompletionListener {
 
     private static final int RECORD_REQUEST_CODE = 101;
@@ -45,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
     private Button stopButton;
     private Button backwardButton;
     private Button forwardButton;
+    private DrawingView drawingView;
 
     private MediaRecorder mediaRecorder;
     private MediaPlayer mediaPlayer;
@@ -69,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
     private int playableSeconds, seconds, dummySeconds = 0;
 
     private int currentTrackIndex = -1;
+
     private File[] tracks;
 
     @SuppressWarnings("deprecation")
@@ -76,6 +95,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
 
     @SuppressWarnings("deprecation")
     Handler handlerRuntime = new Handler();
+
 
 
     @Override
@@ -91,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
         forwardButton = (Button) findViewById(R.id.forwardButton);
         mediaPlayer = new MediaPlayer();
 
-
+        drawingView = findViewById(R.id.drawing_view);
 
         //recording
         recordButton.setOnClickListener(new View.OnClickListener() {
@@ -165,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
                                 //seconds = 0;
                                 isRecording = false;
 
-
+                                drawingView.saveToFile(fileName);
 
                                 runOnUiThread(new Runnable() {
                                     @Override
@@ -174,6 +194,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
                                         playButton.setEnabled(true);
                                         stopButton.setEnabled(true);
                                         backwardButton.setEnabled(true);
+                                        forwardButton.setEnabled(true);
 
                                         handler.removeCallbacksAndMessages(null);
 
@@ -223,6 +244,8 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
                     pause();
                 }
                 mediaPlayer.setOnCompletionListener(MainActivity.this);
+
+
             }
 
         });
@@ -273,6 +296,10 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
                     mediaPlayer.prepare();
                     mediaPlayer.seekTo(musicPosition);
                     mediaPlayer.start();
+
+                    drawingView.loadFromFile(tracks[currentTrackIndex].getName());
+
+
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -288,6 +315,8 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
                     mediaPlayer.prepare();
                     mediaPlayer.start();
                     playButton.setText("Pause");
+
+                    drawingView.loadFromFile(tracks[currentTrackIndex].getName());
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -423,6 +452,9 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
         }
         return directory;
     }
+
+
+
 
 }
 
