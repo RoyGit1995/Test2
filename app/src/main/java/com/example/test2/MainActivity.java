@@ -9,6 +9,7 @@ import android.Manifest;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.media.MediaPlayer;
@@ -17,10 +18,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,6 +35,7 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -48,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
     private DrawingView drawingView;
     private Button nextRecording;
     private Button previousRecording;
+    private Switch vibrateSwitch;
 
 
     private MediaRecorder mediaRecorder;
@@ -76,6 +82,9 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
 
     private File[] tracks;
 
+    private Vibrator vibrator;
+    private Random random;
+
     @SuppressWarnings("deprecation")
     Handler handler = new Handler();
 
@@ -97,9 +106,13 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
         forwardButton = (Button) findViewById(R.id.forwardButton);
         nextRecording = (Button) findViewById(R.id.nextButton);
         previousRecording = (Button) findViewById(R.id.previousTr);
+        vibrateSwitch = findViewById(R.id.vibrate_switch);
         mediaPlayer = new MediaPlayer();
 
         drawingView = findViewById(R.id.drawing_view);
+
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        random = new Random();
 
         //recording
         recordButton.setOnClickListener(new View.OnClickListener() {
@@ -275,7 +288,7 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
             public void onClick(View view) {
 
                 if (pauseButtonPlay) {
-                    if (currentTrackIndex <= tracks.length) {
+                    if (currentTrackIndex + 1 <= tracks.length) {
                         currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
                         play();
                     }
@@ -292,25 +305,61 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
         previousRecording.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (currentTrackIndex - 1 <= tracks.length) {
+                if ((currentTrackIndex - 1 <= tracks.length) && (currentTrackIndex - 1 >= 0)) {
                     if (pauseButtonPlay) {
 
                         currentTrackIndex = (currentTrackIndex - 1) % tracks.length;
                         play();
 
-                    } else {
+                    }
+                    else {
                         currentTrackIndex = (currentTrackIndex - 2) % tracks.length;
                         play();
                     }
                 }
                 else
                 {
+                    currentTrackIndex = -1;
                     play();
                 }
             }
         });
 
+        vibrateSwitch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (vibrateSwitch.isChecked()) {
+                    startVibration();
+                }
+                else {
+                    stopVibration();
+
+                }
+            }
+        });
+
     }
+
+    private void startVibration() {
+        long[] pattern = generateRandomPattern();
+        vibrator.vibrate(VibrationEffect.createWaveform(pattern, -1));
+
+    }
+
+    private void stopVibration() {
+        vibrator.cancel();
+    }
+
+    private long[] generateRandomPattern() {
+        Random random = new Random();
+        int size = random.nextInt(5) + 5; // Generate a pattern of 5 to 10 elements
+        long[] pattern = new long[size];
+        for (int i = 0; i < size; i++) {
+            pattern[i] = random.nextInt(500) + 500; // Generate random duration between 500ms to 1000ms
+        }
+        return pattern;
+    }
+
 
     @Override
     public void onCompletion(MediaPlayer mp) {
@@ -339,20 +388,36 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
                 pauseButtonPlay = false;
 
             } else {
+                if (currentTrackIndex + 1 <= tracks.length) {
+                    try {
+                        currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+                        Log.d("play currentindex value     ", String.valueOf(currentTrackIndex));
+                        mediaPlayer.reset();
+                        mediaPlayer.setDataSource(tracks[currentTrackIndex].getPath());
+                        mediaPlayer.prepare();
+                        mediaPlayer.start();
+                        playButton.setText("Pause");
 
-                try {
-                    currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
-                    Log.d("play", "inside play function");
-                    mediaPlayer.reset();
-                    mediaPlayer.setDataSource(tracks[currentTrackIndex].getPath());
-                    mediaPlayer.prepare();
-                    mediaPlayer.start();
-                    playButton.setText("Pause");
+                        drawingView.loadFromFile(tracks[currentTrackIndex].getName());
 
-                    drawingView.loadFromFile(tracks[currentTrackIndex].getName());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else {
+                    try {
+                        Log.d("play currentindex value     ", String.valueOf(currentTrackIndex));
+                        mediaPlayer.reset();
+                        mediaPlayer.setDataSource(tracks[currentTrackIndex].getPath());
+                        mediaPlayer.prepare();
+                        mediaPlayer.start();
+                        playButton.setText("Pause");
 
-                } catch (IOException e) {
-                    e.printStackTrace();
+                        drawingView.loadFromFile(tracks[currentTrackIndex].getName());
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }

@@ -116,6 +116,19 @@
         app:layout_constraintStart_toEndOf="@+id/nextButton"
         app:layout_constraintTop_toBottomOf="@+id/forwardButton" />
 
+    <Switch
+        android:id="@+id/vibrate_switch"
+        android:layout_width="107dp"
+        android:layout_height="37dp"
+        android:layout_marginStart="21dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="94dp"
+        android:text="Vibrate"
+        app:layout_constraintEnd_toStartOf="@+id/stopButton"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/recordButton" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
