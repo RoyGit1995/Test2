@@ -18,7 +18,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -31,26 +30,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-//////////////
-import android.content.Context;
-import android.graphics.*;
-import android.os.Environment;
-import android.util.AttributeSet;
-import android.util.Log;
-import android.view.MotionEvent;
-import android.view.View;
-import android.widget.Button;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-////////////
 
 public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCompletionListener {
 
@@ -63,6 +46,9 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
     private Button backwardButton;
     private Button forwardButton;
     private DrawingView drawingView;
+    private Button nextRecording;
+    private Button previousRecording;
+
 
     private MediaRecorder mediaRecorder;
     private MediaPlayer mediaPlayer;
@@ -109,6 +95,8 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
         stopButton = (Button) findViewById(R.id.stopButton);
         backwardButton = (Button) findViewById(R.id.backwardButton);
         forwardButton = (Button) findViewById(R.id.forwardButton);
+        nextRecording = (Button) findViewById(R.id.nextButton);
+        previousRecording = (Button) findViewById(R.id.previousTr);
         mediaPlayer = new MediaPlayer();
 
         drawingView = findViewById(R.id.drawing_view);
@@ -160,6 +148,9 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
                                         playButton.setEnabled(false);
                                         stopButton.setEnabled(false);
                                         backwardButton.setEnabled(false);
+                                        forwardButton.setEnabled(false);
+                                        nextRecording.setEnabled(false);
+                                        previousRecording.setEnabled(false);
                                         //playableSeconds = 0;
                                         //seconds = 0;
                                         //dummySeconds = 0;
@@ -195,6 +186,8 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
                                         stopButton.setEnabled(true);
                                         backwardButton.setEnabled(true);
                                         forwardButton.setEnabled(true);
+                                        nextRecording.setEnabled(true);
+                                        previousRecording.setEnabled(true);
 
                                         handler.removeCallbacksAndMessages(null);
 
@@ -273,6 +266,46 @@ public class MainActivity extends AppCompatActivity implements MediaPlayer.OnCom
             public void onClick(View view) {
                 if(mediaPlayer != null){
                     mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + 10000);
+                }
+            }
+        });
+
+        nextRecording.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (pauseButtonPlay) {
+                    if (currentTrackIndex <= tracks.length) {
+                        currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+                        play();
+                    }
+                }
+                else
+                {
+                    play();
+                }
+
+            }
+        });
+
+
+        previousRecording.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (currentTrackIndex - 1 <= tracks.length) {
+                    if (pauseButtonPlay) {
+
+                        currentTrackIndex = (currentTrackIndex - 1) % tracks.length;
+                        play();
+
+                    } else {
+                        currentTrackIndex = (currentTrackIndex - 2) % tracks.length;
+                        play();
+                    }
+                }
+                else
+                {
+                    play();
                 }
             }
         });
