@@ -19,8 +19,8 @@
 
     <TextView
         android:id="@+id/subjectText"
-        android:layout_width="53dp"
-        android:layout_height="15dp"
+        android:layout_width="89dp"
+        android:layout_height="14dp"
         android:layout_marginTop="20dp"
         app:layout_constraintEnd_toStartOf="@+id/nextText"
         app:layout_constraintStart_toEndOf="@+id/imageView3"

@@ -100,6 +100,8 @@ public class FinalActivity extends AppCompatActivity {
     private TextView subjectEdit;
     private TextView nextText;
 
+    boolean recordHappened =false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,7 +110,9 @@ public class FinalActivity extends AppCompatActivity {
         Intent intent = getIntent();
         String subject = intent.getStringExtra("subject");
         String heading = intent.getStringExtra("heading");
+        int secondsSummaryIntent = intent.getIntExtra("secondsSummaryIntent",0);
 
+        seconds = secondsSummaryIntent;
 
         recordButton = (Button) findViewById(R.id.recordButton);
         viewById = (TextView) findViewById(R.id.runTime);
@@ -148,7 +152,14 @@ public class FinalActivity extends AppCompatActivity {
                 Intent intent = new Intent(FinalActivity.this, SummaryActivity.class);
                 intent.putExtra("subject", subjectEditString);
                 intent.putExtra("heading", headingEditString);
+                intent.putExtra("recordHappened", recordHappened);
+                intent.putExtra("seconds", seconds);
                 startActivity(intent);
+                if(null != mediaRecorder)
+                {
+                    mediaRecorder.stop();
+                    mediaRecorder.release();
+                }
             }
         });
 
@@ -161,6 +172,8 @@ public class FinalActivity extends AppCompatActivity {
                     if(!isRecording)
                     {
                         isRecording = true;
+                        recordHappened = true;
+
                         fileRecord = getRecordingFilePath();
 
                         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
@@ -195,6 +208,7 @@ public class FinalActivity extends AppCompatActivity {
                                     @Override
                                     public void run() {
                                         recordButton.setTextColor(Color.parseColor("#FF0000"));
+                                        viewById.setEnabled(true);
                                         runTimer();
 
                                     }
@@ -222,7 +236,7 @@ public class FinalActivity extends AppCompatActivity {
                                     public void run() {
                                         recordButton.setTextColor(Color.parseColor("#ffffff"));
                                         handler.removeCallbacksAndMessages(null);
-
+                                        viewById.setEnabled(false);
 
                                     }
                                 });
