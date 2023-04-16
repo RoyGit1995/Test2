@@ -1,0 +1,75 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#262525">
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="295dp"
+        android:layout_height="99dp"
+        android:layout_marginStart="62dp"
+        android:layout_marginTop="84dp"
+        android:layout_marginEnd="54dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/img" />
+
+    <EditText
+        android:id="@+id/subjectEdit"
+        android:layout_width="222dp"
+        android:layout_height="57dp"
+        android:layout_marginStart="116dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="112dp"
+        android:layout_marginBottom="31dp"
+        android:text="Subject"
+        android:textAllCaps="false"
+        android:textColor="#DDDDDD"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/headingEdit"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView2" />
+
+    <EditText
+        android:id="@+id/headingEdit"
+        android:layout_width="219dp"
+        android:layout_height="57dp"
+        android:layout_marginStart="98dp"
+        android:layout_marginTop="31dp"
+        android:layout_marginEnd="93dp"
+        android:text="Heading"
+        android:textColor="#DDDDDD"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/subjectEdit" />
+
+    <Button
+        android:id="@+id/submitButton"
+        android:layout_width="198dp"
+        android:layout_height="67dp"
+        android:layout_marginStart="106dp"
+        android:layout_marginTop="50dp"
+        android:layout_marginEnd="107dp"
+        android:layout_marginBottom="8dp"
+        android:background="@android:color/white"
+        android:fontFamily="sans-serif"
+        android:text="Submit"
+        android:textColor="#0C0C0C"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headingEdit"
+        app:layout_constraintVertical_bias="0.0"
+        app:strokeColor="#403E3E" />
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
