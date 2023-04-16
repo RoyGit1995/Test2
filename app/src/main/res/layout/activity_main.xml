@@ -8,21 +8,21 @@
 
     <com.example.test2.DrawingView
         android:id="@+id/drawing_view"
-        android:layout_width="448dp"
-        android:layout_height="607dp"
+        android:layout_width="444dp"
+        android:layout_height="562dp"
+        android:layout_marginTop="6dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.512"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintTop_toBottomOf="@+id/vibrate_switch" />
 
     <Button
         android:id="@+id/recordButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="30dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="60dp"
         android:layout_marginEnd="20dp"
         android:text="Record"
         android:textColor="#FFFFFF"
@@ -35,7 +35,7 @@
         android:layout_width="57dp"
         android:layout_height="28dp"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="72dp"
+        android:layout_marginTop="124dp"
         android:layout_marginEnd="50dp"
         app:layout_constraintEnd_toStartOf="@+id/vibrate_switch"
         app:layout_constraintStart_toEndOf="@+id/recordButton"
@@ -45,7 +45,7 @@
         android:id="@+id/vibrate_switch"
         android:layout_width="132dp"
         android:layout_height="52dp"
-        android:layout_marginTop="60dp"
+        android:layout_marginTop="112dp"
         android:layout_marginEnd="28dp"
         android:text="Vibrate mode"
         android:textAllCaps="false"
@@ -93,6 +93,30 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/nextText"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/summaryButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="89dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="79dp"
+        android:text="Summary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/noteButton"
+        app:layout_constraintTop_toBottomOf="@+id/headingText" />
+
+    <Button
+        android:id="@+id/noteButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="46dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="10dp"
+        android:text="Notes"
+        app:layout_constraintEnd_toStartOf="@+id/summaryButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView3" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

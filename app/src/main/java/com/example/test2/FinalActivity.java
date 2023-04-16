@@ -56,6 +56,9 @@ public class FinalActivity extends AppCompatActivity {
     private Button nextRecording;
     private Button previousRecording;
     private Switch vibrateSwitch;
+    private Button summaryButton;
+    private Button notesButton;
+
 
 
     private MediaRecorder mediaRecorder;
@@ -122,11 +125,33 @@ public class FinalActivity extends AppCompatActivity {
         headingEdit.setText(heading);
         nextText.setVisibility(View.VISIBLE);
 
+        summaryButton = (Button) findViewById(R.id.summaryButton);
+        notesButton = (Button) findViewById(R.id.noteButton);
 
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         random = new Random();
 
+        notesButton.setEnabled(false);
+        summaryButton.setEnabled(true);
+
         //recording
+
+        summaryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String subjectEditString = "";
+                String headingEditString = "";
+                subjectEditString = subjectEdit.getText().toString();
+                headingEditString = headingEdit.getText().toString();
+
+                Intent intent = new Intent(FinalActivity.this, SummaryActivity.class);
+                intent.putExtra("subject", subjectEditString);
+                intent.putExtra("heading", headingEditString);
+                startActivity(intent);
+            }
+        });
+
         recordButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
