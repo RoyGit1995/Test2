@@ -216,7 +216,7 @@ public void onClick(View view) {
         mediaPlayer.stop();
         currentTrackIndex = -1;
         playButton.setText("Play");
-        drawingView.loadFromFile(tracks[tracks.length].getName());
+        drawingView.loadFromFile(tracks[tracks.length-1].getName());
         }
         });
 
