@@ -104,7 +104,6 @@ protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.summaryscreen);
 
         playButton = (Button) findViewById(R.id.playButton);
-        viewById = (TextView) findViewById(R.id.runTime);
         stopButton = (Button) findViewById(R.id.stopButton);
         backwardButton = (Button) findViewById(R.id.backwardButton);
         forwardButton = (Button) findViewById(R.id.forwardButton);
