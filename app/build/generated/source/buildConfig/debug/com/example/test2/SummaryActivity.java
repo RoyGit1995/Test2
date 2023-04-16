@@ -142,7 +142,7 @@ protected void onCreate(Bundle savedInstanceState) {
         summaryButton.setEnabled(false);
         noteButton.setEnabled(true);
 
-        if (!recordHappenedSummary) {
+        if (recordHappenedSummary) {
                 playButton.setEnabled(true);
                 stopButton.setEnabled(true);
                 backwardButton.setEnabled(true);
