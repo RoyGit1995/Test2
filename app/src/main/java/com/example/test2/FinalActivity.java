@@ -1,8 +1,14 @@
 package com.example.test2;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import android.Manifest;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -11,22 +17,15 @@ import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-
 import android.os.Environment;
 import android.os.Handler;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,11 +41,8 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/**
- * A simple {@link Fragment} subclass.
- * create an instance of this fragment.
- */
-public class NotesFragment extends Fragment {
+
+public class FinalActivity extends AppCompatActivity {
 
     private static final int RECORD_REQUEST_CODE = 101;
 
@@ -60,6 +56,10 @@ public class NotesFragment extends Fragment {
     private Button nextRecording;
     private Button previousRecording;
     private Switch vibrateSwitch;
+    private Button summaryButton;
+    private Button notesButton;
+
+
 
     private MediaRecorder mediaRecorder;
     private MediaPlayer mediaPlayer;
@@ -96,34 +96,72 @@ public class NotesFragment extends Fragment {
     @SuppressWarnings("deprecation")
     Handler handlerRuntime = new Handler();
 
+    private TextView headingEdit;
+    private TextView subjectEdit;
+    private TextView nextText;
+
     boolean recordHappened =false;
 
-    public NotesFragment() {}
-
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_notes, container, false);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-        Intent intent = getActivity().getIntent();
+        Intent intent = getIntent();
         String subject = intent.getStringExtra("subject");
         String heading = intent.getStringExtra("heading");
         int secondsSummaryIntent = intent.getIntExtra("secondsSummaryIntent",0);
 
         seconds = secondsSummaryIntent;
 
-        recordButton = view.findViewById(R.id.recordButton);
-        viewById = view.findViewById(R.id.runTimeText);
-        vibrateSwitch = view.findViewById(R.id.vibrate_switch);
+        recordButton = (Button) findViewById(R.id.recordButton);
+        viewById = (TextView) findViewById(R.id.runTime);
+        vibrateSwitch = findViewById(R.id.vibrate_switch);
         mediaPlayer = new MediaPlayer();
 
-        drawingView = view.findViewById(R.id.drawing_view);
+        drawingView = findViewById(R.id.drawing_view);
 
-        vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
+        headingEdit = findViewById(R.id.headingText);
+        subjectEdit = findViewById(R.id.subjectText);
+        nextText = findViewById(R.id.nextText);
+
+        subjectEdit.setText(subject);
+        headingEdit.setText(heading);
+        nextText.setVisibility(View.VISIBLE);
+
+        summaryButton = (Button) findViewById(R.id.summaryButton);
+        notesButton = (Button) findViewById(R.id.noteButton);
+
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         random = new Random();
 
+        notesButton.setEnabled(false);
+        summaryButton.setEnabled(true);
 
         //recording
 
+        summaryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String subjectEditString = "";
+                String headingEditString = "";
+                subjectEditString = subjectEdit.getText().toString();
+                headingEditString = headingEdit.getText().toString();
+
+                Intent intent = new Intent(FinalActivity.this, SummaryActivity.class);
+                intent.putExtra("subject", subjectEditString);
+                intent.putExtra("heading", headingEditString);
+                intent.putExtra("recordHappened", recordHappened);
+                intent.putExtra("seconds", seconds);
+                startActivity(intent);
+                if(null != mediaRecorder)
+                {
+                    mediaRecorder.stop();
+                    mediaRecorder.release();
+                }
+            }
+        });
 
         recordButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -137,6 +175,7 @@ public class NotesFragment extends Fragment {
                         recordHappened = true;
 
                         fileRecord = getRecordingFilePath();
+
                         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
                         fileName = "AUDIO_" + timeStamp + ".mp3";
                         file = new File(fileRecord, fileName);
@@ -165,7 +204,7 @@ public class NotesFragment extends Fragment {
 
                                 mediaRecorder.start();
 
-                                getActivity().runOnUiThread(new Runnable() {
+                                runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
                                         recordButton.setTextColor(Color.parseColor("#FF0000"));
@@ -192,7 +231,7 @@ public class NotesFragment extends Fragment {
 
                                 drawingView.saveToFile(fileName);
 
-                                getActivity().runOnUiThread(new Runnable() {
+                                runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
                                         recordButton.setTextColor(Color.parseColor("#ffffff"));
@@ -212,8 +251,6 @@ public class NotesFragment extends Fragment {
                 {
                     requestRecordingPermission();
                 }
-                ((ContainerActivity)getActivity()).setRecordHappened(recordHappened);
-                ((ContainerActivity)getActivity()).setSeconds(seconds);
             }
         });
 
@@ -231,7 +268,7 @@ public class NotesFragment extends Fragment {
                 }
             }
         });
-        return view;
+
     }
 
     private void startVibration() {
@@ -263,7 +300,7 @@ public class NotesFragment extends Fragment {
         values.put(MediaStore.Audio.Media.MIME_TYPE, "audio/mpeg");
         values.put(MediaStore.Audio.Media.RELATIVE_PATH, Environment.DIRECTORY_MUSIC);
 
-        ContentResolver contentResolver = getActivity().getContentResolver();
+        ContentResolver contentResolver = getContentResolver();
         Uri uri = contentResolver.insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, values);
 
         try {
@@ -322,11 +359,11 @@ public class NotesFragment extends Fragment {
     }
 
     private void requestRecordingPermission() {
-        ActivityCompat.requestPermissions(requireActivity(), new String[]{Manifest.permission.RECORD_AUDIO}, RECORD_REQUEST_CODE);
+        ActivityCompat.requestPermissions(FinalActivity.this, new String[]{Manifest.permission.RECORD_AUDIO}, RECORD_REQUEST_CODE);
     }
 
     private boolean checkRecordingPermission() {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_DENIED)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_DENIED)
         {
             requestRecordingPermission();
             return false;
@@ -344,11 +381,11 @@ public class NotesFragment extends Fragment {
                 boolean permissionToRecord = grantResults[0]==PackageManager.PERMISSION_GRANTED;
                 if(permissionToRecord)
                 {
-                    Toast.makeText(requireContext(), "Permission Given",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Permission Given",Toast.LENGTH_SHORT).show();
                 }
                 else
                 {
-                    Toast.makeText(requireContext(), "Permission Denied",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Permission Denied",Toast.LENGTH_SHORT).show();
                 }
             }
         }
@@ -373,4 +410,8 @@ public class NotesFragment extends Fragment {
         }
         return directory;
     }
+
+
+
+
 }
