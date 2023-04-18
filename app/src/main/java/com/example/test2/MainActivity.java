@@ -9,7 +9,7 @@ import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-public class SubjectActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity {
     private EditText headingEdit;
     private EditText subjectEdit;
     private Button submitButton;
@@ -17,7 +17,7 @@ public class SubjectActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_subject);
+        setContentView(R.layout.detaillayout);
 
         subjectEdit = (EditText) findViewById(R.id.subjectEdit);
         headingEdit = (EditText) findViewById(R.id.headingEdit);
@@ -65,7 +65,7 @@ public class SubjectActivity extends AppCompatActivity {
                 subjectEditString = subjectEdit.getText().toString();
                 headingEditString = headingEdit.getText().toString();
 
-                Intent intent = new Intent(SubjectActivity.this, ContainerActivity.class);
+                Intent intent = new Intent(MainActivity.this, FinalActivity.class);
                 intent.putExtra("subject", subjectEditString);
                 intent.putExtra("heading", headingEditString);
                 startActivity(intent);
