@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".SummaryActivity">
@@ -22,25 +21,34 @@
         android:id="@+id/stopButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
-        android:layout_marginEnd="189dp"
+        android:layout_marginStart="11dp"
+        android:layout_marginEnd="119dp"
         android:enabled="false"
         android:text="Stop"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/playButton"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/playButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="31dp"
-        android:layout_marginEnd="15dp"
-        android:layout_marginBottom="11dp"
+        android:layout_marginStart="106dp"
         android:enabled="false"
         android:text="Play"
-        app:layout_constraintBottom_toTopOf="@+id/backwardButton"
         app:layout_constraintEnd_toStartOf="@+id/stopButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/backwardButton"
+        android:layout_width="81dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="65dp"
+        android:enabled="false"
+        android:text="backward"
+        android:textSize="8sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -48,52 +56,39 @@
         android:id="@+id/forwardButton"
         android:layout_width="80dp"
         android:layout_height="48dp"
-        android:layout_marginTop="17dp"
-        android:enabled="false"
-        android:text="10sF"
-        app:layout_constraintEnd_toStartOf="@+id/nextButton"
-        app:layout_constraintStart_toEndOf="@+id/backwardButton"
-        app:layout_constraintTop_toBottomOf="@+id/stopButton" />
-
-    <Button
-        android:id="@+id/nextButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_marginStart="17dp"
         android:layout_marginTop="17dp"
-        android:layout_marginEnd="10dp"
         android:enabled="false"
-        android:text="Next"
-        app:layout_constraintEnd_toStartOf="@+id/previousTr"
-        app:layout_constraintStart_toEndOf="@+id/forwardButton"
-        app:layout_constraintTop_toBottomOf="@+id/stopButton" />
+        android:text="Forward"
+        android:textSize="8sp"
+        app:layout_constraintStart_toEndOf="@+id/backwardButton"
+        app:layout_constraintTop_toBottomOf="@+id/playButton" />
 
     <Button
         android:id="@+id/previousTr"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="20dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="65dp"
+        android:layout_marginEnd="16dp"
         android:enabled="false"
         android:text="Prev"
+        android:textSize="8sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/nextButton"
-        app:layout_constraintTop_toTopOf="@id/nextButton"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/backwardButton"
-        android:layout_width="76dp"
-        android:layout_height="54dp"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="11dp"
-        android:layout_marginEnd="10dp"
+        android:id="@+id/nextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="17dp"
         android:enabled="false"
-        android:text="10sB"
-        app:layout_constraintEnd_toStartOf="@+id/forwardButton"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/playButton" />
-
-
+        android:text="Next"
+        android:textSize="8sp"
+        app:layout_constraintStart_toEndOf="@+id/forwardButton"
+        app:layout_constraintTop_toBottomOf="@+id/stopButton" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

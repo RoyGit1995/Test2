@@ -66,6 +66,14 @@ public class ContainerActivity extends AppCompatActivity implements TabLayout.On
         this.recordHappened = recordHappened;
     }
 
+    public int getSeconds() {
+        return seconds;
+    }
+
+    public boolean isRecordHappened() {
+        return recordHappened;
+    }
+
     private int seconds;
     boolean recordHappened = false;
 
@@ -106,7 +114,7 @@ public class ContainerActivity extends AppCompatActivity implements TabLayout.On
 // Pass data to the SummaryFragment using a Bundle
                         Bundle bundle = new Bundle();
                         bundle.putBoolean("recordHappened", recordHappened);
-                        bundle.putLong("seconds", seconds);
+                        bundle.putInt("seconds", seconds);
                         summaryFragment.setArguments(bundle);
                         return summaryFragment;
                     default:
@@ -144,7 +152,11 @@ public class ContainerActivity extends AppCompatActivity implements TabLayout.On
 
     @Override
     public void onTabSelected(TabLayout.Tab tab) {
-
+        int position = tab.getPosition();
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag("f" + position);
+        if (fragment instanceof SummaryFragment) {
+            ((SummaryFragment) fragment).thisTabSelected();
+        }
     }
 
     @Override
