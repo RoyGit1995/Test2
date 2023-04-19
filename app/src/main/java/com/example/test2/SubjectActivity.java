@@ -9,6 +9,8 @@ import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+
+//This class is not used, its functionality is moved to Summaryfragment
 public class SubjectActivity extends AppCompatActivity {
     private EditText headingEdit;
     private EditText subjectEdit;
@@ -24,7 +26,7 @@ public class SubjectActivity extends AppCompatActivity {
         submitButton = (Button) findViewById(R.id.submitButton);
 
 
-
+        //Setting the text as null as the click happens
         subjectEdit.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -33,6 +35,7 @@ public class SubjectActivity extends AppCompatActivity {
             }
         });
 
+        //Setting the text as null as the click happens
         headingEdit.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -41,7 +44,7 @@ public class SubjectActivity extends AppCompatActivity {
             }
         });
 
-
+        //Setting the text as null as the click happens, if user click around it for good interaction
         subjectEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -49,6 +52,7 @@ public class SubjectActivity extends AppCompatActivity {
             }
         });
 
+        //Setting the text as null as the click happens, if user click around it for good interaction
         headingEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -56,6 +60,7 @@ public class SubjectActivity extends AppCompatActivity {
             }
         });
 
+        //Intent to send data across to notes page
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

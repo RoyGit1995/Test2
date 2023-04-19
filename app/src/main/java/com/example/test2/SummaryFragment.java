@@ -109,6 +109,7 @@ public class SummaryFragment extends Fragment implements MediaPlayer.OnCompletio
         recordHappenedSummary = bundle.getBoolean("recordHappened");
         seconds = bundle.getInt("seconds");
 
+        //setting the vibrator
         vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
         random = new Random();
 
@@ -118,7 +119,7 @@ public class SummaryFragment extends Fragment implements MediaPlayer.OnCompletio
             @Override
             public void onClick(View view) {
                 //Log.d("playButton", "playButton is pressed");
-
+                //This variable detects two types of play, if the play is happening without pause then this is false
                 if (playButtonPressed) {
                     //Log.d("playButtonPressed", "inside play button if");
                     playButtonPressed = false;
@@ -129,14 +130,18 @@ public class SummaryFragment extends Fragment implements MediaPlayer.OnCompletio
                         return;
                     }
                     mediaPlayer = new MediaPlayer();
+                    //calling the function to play audio
                     play();
 
                 } else {
                     //Log.d("pauseButtonPressed", "inside pause button");
+                    //This variable detects two types of play, if the play is happening after pause then this is false
+
                     playButtonPressed = true;
                     playButton.setText("Play");
                     pause();
                 }
+                //this will play the next audio after the current is completed
                 mediaPlayer.setOnCompletionListener(SummaryFragment.this);
 
 
@@ -144,6 +149,7 @@ public class SummaryFragment extends Fragment implements MediaPlayer.OnCompletio
 
         });
 
+        //stop button
         stopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -152,7 +158,7 @@ public class SummaryFragment extends Fragment implements MediaPlayer.OnCompletio
         });
 
 
-
+        //backward button,sets the current position to -10 seconds
         backwardButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -162,6 +168,7 @@ public class SummaryFragment extends Fragment implements MediaPlayer.OnCompletio
             }
         });
 
+        //backward button,sets the current position to +10 seconds
         forwardButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -171,6 +178,7 @@ public class SummaryFragment extends Fragment implements MediaPlayer.OnCompletio
             }
         });
 
+        //plays next recording after checking the boundaries
         nextRecording.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -187,7 +195,7 @@ public class SummaryFragment extends Fragment implements MediaPlayer.OnCompletio
             }
         });
 
-
+        //plays previous recording after checking the boundaries, and replays if the current track is the first one
         previousRecording.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -210,6 +218,8 @@ public class SummaryFragment extends Fragment implements MediaPlayer.OnCompletio
         return rootView;
     }
 
+
+    //stop media player and set the track index to first one as it start from first. -1 due to the currenttrack+1 check in play()
     private void stopMediaPlayer() {
         mediaPlayer.stop();
         currentTrackIndex = -1;
@@ -217,6 +227,7 @@ public class SummaryFragment extends Fragment implements MediaPlayer.OnCompletio
         drawingView.loadFromFile(tracks[tracks.length - 1].getName());
     }
 
+    //oncompletion funtion is set here, in android api 30+, this is the way to use it for more control
     @Override
     public void onCompletion(MediaPlayer mp) {
         // When the current music file finishes playing, play the next one
@@ -224,8 +235,10 @@ public class SummaryFragment extends Fragment implements MediaPlayer.OnCompletio
         play();
     }
 
+    //play function
     private void play() {
         if (currentTrackIndex <= tracks.length) {
+            //if play is happening after pause, so no next track updation, and set the musicposition to the paused value
             if (pauseButtonPlay) {
                 Log.d("pauseButtonPlay", "pauseButtonPlay to start from the pause ");
                 mediaPlayer.reset();
@@ -234,16 +247,18 @@ public class SummaryFragment extends Fragment implements MediaPlayer.OnCompletio
                     mediaPlayer.prepare();
                     mediaPlayer.seekTo(musicPosition);
                     mediaPlayer.start();
-
+                    //calls the load from file to display the bitmap of the current audio
                     drawingView.loadFromFile(tracks[currentTrackIndex].getName());
 
 
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
+                //here its set back as false
                 pauseButtonPlay = false;
 
             } else {
+                //boundary check
                 if (currentTrackIndex + 1 <= tracks.length) {
                     try {
                         currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
@@ -252,7 +267,9 @@ public class SummaryFragment extends Fragment implements MediaPlayer.OnCompletio
                         mediaPlayer.setDataSource(tracks[currentTrackIndex].getPath());
                         mediaPlayer.prepare();
                         mediaPlayer.start();
+                        //set the text back as pause
                         playButton.setText("Pause");
+                        //calls the load from file to display the bitmap of the current audio
 
                         drawingView.loadFromFile(tracks[currentTrackIndex].getName());
 
@@ -266,6 +283,7 @@ public class SummaryFragment extends Fragment implements MediaPlayer.OnCompletio
                         mediaPlayer.setDataSource(tracks[currentTrackIndex].getPath());
                         mediaPlayer.prepare();
                         mediaPlayer.start();
+                        //set the text back as pause
                         playButton.setText("Pause");
 
                         drawingView.loadFromFile(tracks[currentTrackIndex].getName());
@@ -280,6 +298,7 @@ public class SummaryFragment extends Fragment implements MediaPlayer.OnCompletio
         }
     }
 
+    //pause function, also grabs the current position where pause is happened
     private void pause() {
         pauseButtonPlay = true;
         mediaPlayer.pause();
@@ -287,33 +306,6 @@ public class SummaryFragment extends Fragment implements MediaPlayer.OnCompletio
         Log.d("musicPosition value issssss.....", String.valueOf(musicPosition));
     }
 
-    private void saveAudioFile() {
-
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.Audio.Media.DISPLAY_NAME, fileName);
-        values.put(MediaStore.Audio.Media.MIME_TYPE, "audio/mpeg");
-        values.put(MediaStore.Audio.Media.RELATIVE_PATH, Environment.DIRECTORY_MUSIC);
-
-        ContentResolver contentResolver = getActivity().getContentResolver();
-        Uri uri = contentResolver.insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, values);
-
-        try {
-            OutputStream outputStream = contentResolver.openOutputStream(uri);
-            FileInputStream fileInputStream = new FileInputStream(file);
-
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-
-            while ((bytesRead = fileInputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
-
-            fileInputStream.close();
-            outputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
 
     private void requestRecordingPermission() {
@@ -341,26 +333,6 @@ public class SummaryFragment extends Fragment implements MediaPlayer.OnCompletio
                 }
             }
         }
-    }
-
-    private File getRecordingFilePath() {
-
-        File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC), "Audio Recordings");
-
-        Log.d("Directory", directory.getAbsolutePath().toString());
-
-        if (!directory.exists()) {
-            directory.mkdirs();
-        } else {
-            File[] files = directory.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    Log.d("Files", file.getName().toString() + "         " + file.getAbsolutePath());
-                    file.delete();
-                }
-            }
-        }
-        return directory;
     }
 
     public void otherTabSelected() {

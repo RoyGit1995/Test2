@@ -104,13 +104,6 @@ public class NotesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_notes, container, false);
 
-        Intent intent = getActivity().getIntent();
-        String subject = intent.getStringExtra("subject");
-        String heading = intent.getStringExtra("heading");
-        int secondsSummaryIntent = intent.getIntExtra("secondsSummaryIntent",0);
-
-        seconds = secondsSummaryIntent;
-
         recordButton = view.findViewById(R.id.recordButton);
         viewById = view.findViewById(R.id.runTimeText);
         vibrateSwitch = view.findViewById(R.id.vibrate_switch);
@@ -122,9 +115,7 @@ public class NotesFragment extends Fragment {
         random = new Random();
 
 
-        //recording
-
-
+        //recording on click listener
         recordButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -133,7 +124,9 @@ public class NotesFragment extends Fragment {
                 {
                     if(!isRecording)
                     {
+                        //To know whether its recording or not
                         isRecording = true;
+                        //Its a one time true setter for enabling the play,stop,forward,backward buttons in summary page
                         recordHappened = true;
                         ((ContainerActivity)getActivity()).setRecordHappened(recordHappened);
 
@@ -148,6 +141,7 @@ public class NotesFragment extends Fragment {
 
                             @Override
                             public void run() {
+                                //Loading the mediarecorder
                                 mediaRecorder = new MediaRecorder();
                                 mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
                                 mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
@@ -166,6 +160,7 @@ public class NotesFragment extends Fragment {
 
                                 mediaRecorder.start();
 
+                                //UI changes on another thread
                                 getActivity().runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -180,11 +175,13 @@ public class NotesFragment extends Fragment {
                     }
                     else
                     {
+                        //If recording is stopped
                         executorService.execute(new Runnable() {
                             @Override
                             public void run() {
                                 mediaRecorder.stop();
                                 mediaRecorder.release();
+                                //To save audio file, after the stop button is pressed.
                                 saveAudioFile();
                                 mediaRecorder = null;
                                 playableSeconds = seconds;
@@ -219,7 +216,7 @@ public class NotesFragment extends Fragment {
         });
 
 
-
+        //Vibrate switch
         vibrateSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -256,7 +253,7 @@ public class NotesFragment extends Fragment {
     }
 
 
-
+    //To save audio file
     private void saveAudioFile() {
 
         ContentValues values = new ContentValues();
@@ -285,6 +282,7 @@ public class NotesFragment extends Fragment {
         }
     }
 
+    //Runtimer takes the universal seconds variable and keep adding it, it uses postdelay to add 1 second each
     private void runTimer()
     {
         handlerRuntime.post(new Runnable() {
@@ -322,6 +320,7 @@ public class NotesFragment extends Fragment {
 
     }
 
+    //requesting permission for storage, corresponding code in manifest
     private void requestRecordingPermission() {
         ActivityCompat.requestPermissions(requireActivity(), new String[]{Manifest.permission.RECORD_AUDIO}, RECORD_REQUEST_CODE);
     }
@@ -354,6 +353,8 @@ public class NotesFragment extends Fragment {
             }
         }
     }
+
+    //Filepath is loaded
     private File getRecordingFilePath() {
 
         File directory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC), "Audio Recordings");

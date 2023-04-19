@@ -89,6 +89,7 @@ public class DrawingView extends View {
         return true;
     }
 
+    //these functions for future use
     public void setDrawingColor(int color) {
         drawingPaint.setColor(color);
     }
@@ -112,6 +113,7 @@ public class DrawingView extends View {
         invalidate();
     }
 
+    //saving the bitmap file with audiofile name
     public void saveToFile(String fileNameAudio) {
 
         Log.d("fileName from audio    " , fileNameAudio.toString());
@@ -148,6 +150,8 @@ public class DrawingView extends View {
         ++saveBitmapIndex;
 
     }
+
+    //loading and drawing from audio file name.
 
     public void loadFromFile(String fileNameAudio) {
         try {

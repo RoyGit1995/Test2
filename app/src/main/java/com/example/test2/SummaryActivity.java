@@ -67,8 +67,6 @@ public class SummaryActivity extends AppCompatActivity implements MediaPlayer.On
 
     private boolean pauseButtonPlay = false;
 
-    ExecutorService executorService = Executors.newSingleThreadExecutor();
-
     private int playableSeconds, seconds, dummySeconds = 0;
 
     private int currentTrackIndex = -1;
@@ -108,6 +106,7 @@ public class SummaryActivity extends AppCompatActivity implements MediaPlayer.On
         subjectEdit = findViewById(R.id.subjectText);
         nextText = findViewById(R.id.nextText);
 
+        //Lo
         Intent intent = getIntent();
         String subject = intent.getStringExtra("subject");
         String heading = intent.getStringExtra("heading");
