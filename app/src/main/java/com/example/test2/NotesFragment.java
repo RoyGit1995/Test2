@@ -135,6 +135,7 @@ public class NotesFragment extends Fragment {
                     {
                         isRecording = true;
                         recordHappened = true;
+                        ((ContainerActivity)getActivity()).setRecordHappened(recordHappened);
 
                         fileRecord = getRecordingFilePath();
                         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
@@ -212,7 +213,7 @@ public class NotesFragment extends Fragment {
                 {
                     requestRecordingPermission();
                 }
-                ((ContainerActivity)getActivity()).setRecordHappened(recordHappened);
+                //((ContainerActivity)getActivity()).setRecordHappened(recordHappened);
                 ((ContainerActivity)getActivity()).setSeconds(seconds);
             }
         });

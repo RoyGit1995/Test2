@@ -108,24 +108,11 @@ public class SummaryFragment extends Fragment implements MediaPlayer.OnCompletio
         Bundle bundle = getArguments();
         recordHappenedSummary = bundle.getBoolean("recordHappened");
         seconds = bundle.getInt("seconds");
-        
-        tracks = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).listFiles((dir, name) -> name.endsWith(".mp3"));
-        Log.d("track issss", tracks[tracks.length - 1].getName().toString());
-        drawingView.loadFromFile(tracks[tracks.length - 1].getName());
 
         vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
         random = new Random();
 
-        if (recordHappenedSummary) {
-            playButton.setEnabled(true);
-            stopButton.setEnabled(true);
-            backwardButton.setEnabled(true);
-            forwardButton.setEnabled(true);
-            nextRecording.setEnabled(true);
-            previousRecording.setEnabled(true);
-
-        }
-
+        intializeButtons();
 
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -381,6 +368,29 @@ public class SummaryFragment extends Fragment implements MediaPlayer.OnCompletio
         playButtonPressed = true;
         if (null != mediaPlayer) {
             stopMediaPlayer();
+        }
+    }
+
+    public void thisTabSelected() {
+        recordHappenedSummary = ((ContainerActivity)getActivity()).isRecordHappened();
+        seconds = ((ContainerActivity)getActivity()).getSeconds();
+        intializeButtons();
+    }
+
+    public void intializeButtons()
+    {
+        if (recordHappenedSummary) {
+            playButton.setEnabled(true);
+            stopButton.setEnabled(true);
+            backwardButton.setEnabled(true);
+            forwardButton.setEnabled(true);
+            nextRecording.setEnabled(true);
+            previousRecording.setEnabled(true);
+
+            tracks = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).listFiles((dir, name) -> name.endsWith(".mp3"));
+            Log.d("track issss", tracks[tracks.length - 1].getName().toString());
+            drawingView.loadFromFile(tracks[tracks.length - 1].getName());
+
         }
     }
 }
