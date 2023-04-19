@@ -9,4 +9,6 @@
     <string name="play_recording">Play Recording</string>
     <string name="stop_playing">Stop Playing</string>
     <string name="status">Status</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

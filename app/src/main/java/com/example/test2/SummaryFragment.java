@@ -1,14 +1,8 @@
 package com.example.test2;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
 import android.Manifest;
 import android.content.ContentResolver;
 import android.content.ContentValues;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -16,12 +10,20 @@ import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,7 +36,11 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class SummaryActivity extends AppCompatActivity implements MediaPlayer.OnCompletionListener {
+/**
+ * A simple {@link Fragment} subclass.
+ * create an instance of this fragment.
+ */
+public class SummaryFragment extends Fragment implements MediaPlayer.OnCompletionListener {
 
     private static final int RECORD_REQUEST_CODE = 101;
 
@@ -73,7 +79,7 @@ public class SummaryActivity extends AppCompatActivity implements MediaPlayer.On
 
     private int currentTrackIndex = -1;
 
-    private boolean recordHappenedSummary, recordHappened = false;
+    private boolean recordHappenedSummary = false;
 
     private File[] tracks;
 
@@ -86,53 +92,29 @@ public class SummaryActivity extends AppCompatActivity implements MediaPlayer.On
     @SuppressWarnings("deprecation")
     Handler handlerRuntime = new Handler();
 
-    private TextView headingEdit;
-    private TextView subjectEdit;
-    private TextView nextText;
-
-
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.summaryscreen);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_summary, container, false);
 
-        playButton = (Button) findViewById(R.id.playButton);
-        stopButton = (Button) findViewById(R.id.stopButton);
-        backwardButton = (Button) findViewById(R.id.backwardButton);
-        forwardButton = (Button) findViewById(R.id.forwardButton);
-        nextRecording = (Button) findViewById(R.id.nextButton);
-        previousRecording = (Button) findViewById(R.id.previousTr);
-        mediaPlayer = new MediaPlayer();
+        playButton = rootView.findViewById(R.id.playButton);
+        stopButton = rootView.findViewById(R.id.stopButton);
+        backwardButton = rootView.findViewById(R.id.backwardButton);
+        forwardButton = rootView.findViewById(R.id.forwardButton);
+        nextRecording = rootView.findViewById(R.id.nextButton);
+        previousRecording = rootView.findViewById(R.id.previousTr);
+        drawingView = rootView.findViewById(R.id.drawing_view);
 
-        headingEdit = findViewById(R.id.headingText);
-        subjectEdit = findViewById(R.id.subjectText);
-        nextText = findViewById(R.id.nextText);
-
-        Intent intent = getIntent();
-        String subject = intent.getStringExtra("subject");
-        String heading = intent.getStringExtra("heading");
-        recordHappenedSummary = intent.getBooleanExtra("recordHappened", recordHappened);
-        int secondsSummaryIntent = intent.getIntExtra("seconds", seconds);
-
-
-        subjectEdit.setText(subject);
-        headingEdit.setText(heading);
-        nextText.setVisibility(View.VISIBLE);
-
-        drawingView = findViewById(R.id.drawing_view);
-
+        // Retrieve data from the arguments Bundle
+        Bundle bundle = getArguments();
+        recordHappenedSummary = bundle.getBoolean("recordHappened");
+        seconds = bundle.getInt("seconds");
+        
         tracks = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).listFiles((dir, name) -> name.endsWith(".mp3"));
         Log.d("track issss", tracks[tracks.length - 1].getName().toString());
         drawingView.loadFromFile(tracks[tracks.length - 1].getName());
 
-        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
         random = new Random();
-
-        noteButton = (Button) findViewById(R.id.noteButton);
-        summaryButton = (Button) findViewById(R.id.summaryButton);
-
-        summaryButton.setEnabled(false);
-        noteButton.setEnabled(true);
 
         if (recordHappenedSummary) {
             playButton.setEnabled(true);
@@ -143,28 +125,6 @@ public class SummaryActivity extends AppCompatActivity implements MediaPlayer.On
             previousRecording.setEnabled(true);
 
         }
-
-        noteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                String subjectEditString = "";
-                String headingEditString = "";
-                subjectEditString = subjectEdit.getText().toString();
-                headingEditString = headingEdit.getText().toString();
-
-
-                Intent intent = new Intent(SummaryActivity.this, ContainerActivity.class);
-                intent.putExtra("subject", subjectEditString);
-                intent.putExtra("heading", headingEditString);
-                intent.putExtra("secondsSummaryIntent", secondsSummaryIntent);
-                startActivity(intent);
-                if (null != mediaRecorder) {
-                    mediaRecorder.stop();
-                    mediaRecorder.release();
-                }
-            }
-        });
 
 
         playButton.setOnClickListener(new View.OnClickListener() {
@@ -178,7 +138,7 @@ public class SummaryActivity extends AppCompatActivity implements MediaPlayer.On
                     if (recordHappenedSummary) {
                         tracks = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).listFiles((dir, name) -> name.endsWith(".mp3"));
                     } else {
-                        Toast.makeText(getApplicationContext(), "No recording Present", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity().getApplicationContext(), "No recording Present", Toast.LENGTH_SHORT).show();
                         return;
                     }
                     mediaPlayer = new MediaPlayer();
@@ -190,7 +150,7 @@ public class SummaryActivity extends AppCompatActivity implements MediaPlayer.On
                     playButton.setText("Play");
                     pause();
                 }
-                mediaPlayer.setOnCompletionListener(SummaryActivity.this);
+                mediaPlayer.setOnCompletionListener(SummaryFragment.this);
 
 
             }
@@ -200,12 +160,11 @@ public class SummaryActivity extends AppCompatActivity implements MediaPlayer.On
         stopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mediaPlayer.stop();
-                currentTrackIndex = -1;
-                playButton.setText("Play");
-                drawingView.loadFromFile(tracks[tracks.length - 1].getName());
+                stopMediaPlayer();
             }
         });
+
+
 
         backwardButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -261,9 +220,15 @@ public class SummaryActivity extends AppCompatActivity implements MediaPlayer.On
                 }
             }
         });
-
+        return rootView;
     }
 
+    private void stopMediaPlayer() {
+        mediaPlayer.stop();
+        currentTrackIndex = -1;
+        playButton.setText("Play");
+        drawingView.loadFromFile(tracks[tracks.length - 1].getName());
+    }
 
     @Override
     public void onCompletion(MediaPlayer mp) {
@@ -342,7 +307,7 @@ public class SummaryActivity extends AppCompatActivity implements MediaPlayer.On
         values.put(MediaStore.Audio.Media.MIME_TYPE, "audio/mpeg");
         values.put(MediaStore.Audio.Media.RELATIVE_PATH, Environment.DIRECTORY_MUSIC);
 
-        ContentResolver contentResolver = getContentResolver();
+        ContentResolver contentResolver = getActivity().getContentResolver();
         Uri uri = contentResolver.insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, values);
 
         try {
@@ -365,11 +330,11 @@ public class SummaryActivity extends AppCompatActivity implements MediaPlayer.On
 
 
     private void requestRecordingPermission() {
-        ActivityCompat.requestPermissions(SummaryActivity.this, new String[]{Manifest.permission.RECORD_AUDIO}, RECORD_REQUEST_CODE);
+        ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.RECORD_AUDIO}, RECORD_REQUEST_CODE);
     }
 
     private boolean checkRecordingPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_DENIED) {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_DENIED) {
             requestRecordingPermission();
             return false;
         }
@@ -383,9 +348,9 @@ public class SummaryActivity extends AppCompatActivity implements MediaPlayer.On
             if (grantResults.length > 0) {
                 boolean permissionToRecord = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                 if (permissionToRecord) {
-                    Toast.makeText(getApplicationContext(), "Permission Given", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity().getApplicationContext(), "Permission Given", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(getApplicationContext(), "Permission Denied", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity().getApplicationContext(), "Permission Denied", Toast.LENGTH_SHORT).show();
                 }
             }
         }
@@ -411,5 +376,11 @@ public class SummaryActivity extends AppCompatActivity implements MediaPlayer.On
         return directory;
     }
 
-
+    public void otherTabSelected() {
+        pauseButtonPlay = false;
+        playButtonPressed = true;
+        if (null != mediaPlayer) {
+            stopMediaPlayer();
+        }
+    }
 }
